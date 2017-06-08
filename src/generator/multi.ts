@@ -1,6 +1,6 @@
 import { Swatch, Palette } from '../color'
 import { Generator } from '../typing'
-import { hslToRgb } from '../util'
+import { hslToRgb, rgbDiff } from '../util'
 import defaults = require('lodash/defaults')
 
 interface MultiGeneratorOptions {
@@ -17,7 +17,9 @@ interface MultiGeneratorOptions {
     minVibrantSaturation: number,
     weightSaturation: number,
     weightLuma: number,
-    weightPopulation: number
+    weightPopulation: number,
+    swatchCount: number,
+    diffThreshold: number,
 }
 
 const DefaultOpts: MultiGeneratorOptions = {
@@ -35,6 +37,8 @@ const DefaultOpts: MultiGeneratorOptions = {
     weightSaturation: 3,
     weightLuma: 6,
     weightPopulation: 1,
+    swatchCount: 3,
+    diffThreshold: 15,
 }
 
 function _findMaxPopulation(swatches: Array<Swatch>): number {
@@ -95,27 +99,45 @@ function _findColorVariation(palette: Palette, swatches: Array<Swatch>, maxPopul
     maxSaturation: number,
     opts: MultiGeneratorOptions): Swatch {
 
-    let max: Swatch = null
-    let maxValue = 0
-
-    swatches.forEach((swatch) => {
-        let [, s, l] = swatch.getHsl()
-
-        if (s >= minSaturation && s <= maxSaturation
+    // Filter the swatches by those that fit the min/max critera
+    const finalSwatches = swatches.filter((swatch) => {
+        const [, s, l] = swatch.getHsl()
+        const valid = (s >= minSaturation && s <= maxSaturation
             && l >= minLuma && l <= maxLuma
             && !_isAlreadySelected(palette, swatch)
-        ) {
-            let value = _createComparisonValue(s, targetSaturation, l, targetLuma, swatch.getPopulation(), maxPopulation, opts)
-
-            if (max === null || value > maxValue) {
-                max = swatch
-                maxValue = value
+        )
+        return valid
+    })
+    // Then sort them by their comparison values
+    .sort((swatch1, swatch2) => {
+        const [, s1, l1] = swatch1.getHsl()
+        const [, s2, l2] = swatch2.getHsl()
+        const value1 = _createComparisonValue(s1, targetSaturation, l1, targetLuma, swatch1.getPopulation(), maxPopulation, opts)
+        const value2 = _createComparisonValue(s2, targetSaturation, l2, targetLuma, swatch2.getPopulation(), maxPopulation, opts)
+        return value2 - value1
+    })
+    // Then remove colors that are too similar
+    .reduce((acc, swatch) => {
+        let isUnique = true;
+        for (const keptSwatch of acc) {
+            const diff = rgbDiff(swatch.getRgb(), keptSwatch.getRgb())
+            if (diff < opts.diffThreshold) {
+                // Then this color is too close to one already kept, leave it out
+                isUnique = false;
+                // console.log(`%c${swatch.getHex()} is too close to %c${keptSwatch.getHex()}: Diff = ${rgbDiff(swatch.getRgb(), keptSwatch.getRgb())}`, `background: ${swatch.getHex()}; color: ${swatch.getBodyTextColor()}`, `background: ${keptSwatch.getHex()}; color: ${keptSwatch.getBodyTextColor()}`)
+                break;
             }
-
         }
+        if (isUnique) { acc.push(swatch) }
+        return acc;
+    }, [])
+
+    finalSwatches.forEach((swatch) => {
+        const [, s, l] = swatch.getHsl()
+        let value = _createComparisonValue(s, targetSaturation, l, targetLuma, swatch.getPopulation(), maxPopulation, opts)
     })
 
-    return max
+    return finalSwatches[0]
 }
 
 function _generateVariationColors(swatches: Array<Swatch>, maxPopulation: number, opts: MultiGeneratorOptions): Palette {
