@@ -50,7 +50,7 @@ const paletteCallback = (references: any, sample: Sample, done?: MochaDone) =>
             }
 
             if (expected === null) {
-                if (actual !== null) {
+                if (actual) {
                     console.warn(`WARN: ${name} color form '${target}' was not expected. Got ${actual.getHex()}`)
                 }
                 // expect(actual, `${name} color form '${target}' was not expected`).to.be.null
@@ -69,8 +69,8 @@ const paletteCallback = (references: any, sample: Sample, done?: MochaDone) =>
         let diffTable = []
         for (let name in palette) {
             var left
-            let actual = palette[name]
-            let colorDiff = [name, (left = (actual != null ? actual.getHex() : undefined)) != null ? left : 'null']
+            let actual = palette[name][0]
+            let colorDiff = [name, (left = (actual ? actual.getHex() : undefined)) != null ? left : 'null']
             for (let target of TARGETS) {
                 let r = testWithTarget(name, actual, target)
                 colorDiff.push(r.expected)

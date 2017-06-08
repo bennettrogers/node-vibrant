@@ -9,13 +9,13 @@ export interface Vec3 extends Array<number> {
 }
 
 export interface Palette {
-    Vibrant?: Swatch,
-    Muted?: Swatch,
-    DarkVibrant?: Swatch,
-    DarkMuted?: Swatch,
-    LightVibrant?: Swatch,
-    LightMuted?: Swatch
-    [name: string]: Swatch
+    Vibrant?: Array<Swatch>,
+    Muted?: Array<Swatch>,
+    DarkVibrant?: Array<Swatch>,
+    DarkMuted?: Array<Swatch>,
+    LightVibrant?: Array<Swatch>,
+    LightMuted?: Array<Swatch>
+    [name: string]: Array<Swatch>
 }
 
 
