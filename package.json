@@ -26,6 +26,7 @@
     "@types/table": "^4.0.1",
     "chai": "^3.5.0",
     "finalhandler": "^1.0.0",
+    "generate-json-webpack-plugin": "^0.2.1",
     "karma": "^1.5.0",
     "karma-chai": "^0.1.0",
     "karma-chrome-launcher": "^2.0.0",
@@ -53,8 +54,7 @@
     "test": "npm run test:node && npm run test:browser",
     "test:node": "./node_modules/.bin/mocha lib/test/**/*.spec.js",
     "test:browser": "./node_modules/.bin/karma start karma.conf.js",
-    "prepublish": "npm run clean && npm run build",
-    "postinstall": "npm install && npm run build"
+    "prepublish": "npm run clean && npm run build"
   },
   "repository": {
     "type": "git",
