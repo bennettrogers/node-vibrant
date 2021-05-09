@@ -38,7 +38,7 @@ const DefaultOpts: MultiGeneratorOptions = {
     weightLuma: 6,
     weightPopulation: 1,
     swatchCount: 3,
-    diffThreshold: 15,
+    diffThreshold: 0,
 }
 
 function _findMaxPopulation(swatches: Array<Swatch>): number {
@@ -106,13 +106,14 @@ function _findColorVariation(palette: Palette, swatches: Array<Swatch>, maxPopul
         const value2 = _createComparisonValue(s2, targetSaturation, l2, targetLuma, swatch2.getPopulation(), maxPopulation, opts)
         return value2 - value1
     })
-    // Then remove colors that are too similar
+    // Then merge colors that are too similar
     .reduce((acc, swatch) => {
         let isUnique = true;
         for (const keptSwatch of acc) {
             const diff = rgbDiff(swatch.getRgb(), keptSwatch.getRgb())
             if (diff < opts.diffThreshold) {
                 // Then this color is too close to one already kept, leave it out
+                // TODO: need to aggregate population somehow
                 isUnique = false;
                 // console.log(`%c${swatch.getHex()} is too close to %c${keptSwatch.getHex()}: Diff = ${rgbDiff(swatch.getRgb(), keptSwatch.getRgb())}`, `background: ${swatch.getHex()}; color: ${swatch.getBodyTextColor()}`, `background: ${keptSwatch.getHex()}; color: ${keptSwatch.getBodyTextColor()}`)
                 break;
@@ -207,6 +208,7 @@ function _generateEmptySwatches(palette: Palette, maxPopulation: number, opts: M
 }
 
 const MultiGenerator: Generator = (swatches: Array<Swatch>, opts?: MultiGeneratorOptions): Palette => {
+    swatches = swatches ? swatches : [];
     opts = <MultiGeneratorOptions>defaults({}, opts, DefaultOpts)
     let maxPopulation = _findMaxPopulation(swatches)
 

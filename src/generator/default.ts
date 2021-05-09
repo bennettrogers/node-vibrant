@@ -195,6 +195,7 @@ function _generateEmptySwatches(palette: Palette, maxPopulation: number, opts: D
 }
 
 const DefaultGenerator: Generator = (swatches: Array<Swatch>, opts?: DefaultGeneratorOptions): Palette => {
+    swatches = swatches ? swatches : [];
     opts = <DefaultGeneratorOptions>defaults({}, opts, DefaultOpts)
     let maxPopulation = _findMaxPopulation(swatches)
 

@@ -12,6 +12,7 @@ var packagePlatformJson = {
     'keywords': packageJson.keywords,
     'homepage': packageJson.homepage,
     'license': packageJson.license,
+    'main': 'vibrant.min.js',
     'files': [
       'vibrant.js',
       'vibrant.js.map',

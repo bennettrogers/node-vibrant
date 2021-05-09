@@ -43,6 +43,10 @@ export class Swatch {
     }
     getPopulation(): number { return this._population }
 
+    setPopulation(population: number) {
+        this._population = population
+    }
+
     getHex(): string {
         if (!this._hex) {
             let [r, g, b] = this._rgb
